@@ -71,8 +71,65 @@ function initExhibit1(userRig){
 function initExhibit2(userRig){
 
     // Exhibit 2 - OBJ Loading Example
+    let controllerModel = new THREE.Mesh(
+	new THREE.BoxGeometry(0.25, 0.25, 0.25),
+	new THREE.MeshPhongMaterial({color: 0xff0000}));
+	
     var exhibit = new THREE.Group();
-    exhibit.add(new USER.UserPlatform(userRig));  
+    exhibit.add(new USER.UserPlatform(
+	userRig,
+	function (){
+	    console.log("Landing at Exhibit 2");
+	    // Get controller's position
+	    let controller = userRig.getController(0);
+	    // Add new model for controller (should be removed on leaving).
+	    controller.add(controllerModel);
+	    // Set animation to check whether trigger button is
+	    // pressed and then fire a projectile in the frame of the
+	    // controller if is and enough time has elapsed since last
+	    // firing.
+	    controller.setAnimation(
+		function (dt){
+		    if (this.t == undefined){
+			this.t = 0;
+		    }
+		    this.t += dt;
+		    // Decide to fire.
+		    if (controller.triggered
+			&& (this.t - this.lastFire >= 10
+			    || this.lastFire == undefined)){
+			this.lastFire = this.t;
+			// Create new projectile and set up motion.
+			let proj = controllerModel.clone();
+			console.log("Firing");
+			controller.add(proj);
+			proj.setAnimation(
+			    function (dt){
+				if (this.t == undefined){
+				    this.t = 0;
+				}
+				this.t += dt;
+				this.position.z -= dt;
+				// Cause the projectile to disappear after t is 20.
+				if (this.t > 20){
+				    this.parent.remove(this);
+				}
+			    }
+			);
+		    }
+		}
+	    );
+
+	},
+	function (){
+	    console.log("Leaving Exhibit 2");
+	    let controller = userRig.getController(0);
+	    // Clear the model added to controller.
+	    controller.remove(controllerModel);
+	    // Remove special animation attached to controller.
+	    controller.setAnimation(undefined);
+	}
+    ));  
 
     // Rig to hold the loaded model.
     var rig = new THREE.Group();
@@ -421,11 +478,13 @@ function onWindowResize() {
 // Is repeatedly called by main rendering loop.
 function render() {
 
+    let dt = 0.1;
     // Force the gui to appear as heads up display tracking headset
     // position.
-    for (var i = 0; i < animatedObjects.length; i++){
-	animatedObjects[i].animate(0.1);
+    for (let i = 0; i < animatedObjects.length; i++){
+	animatedObjects[i].animate(dt);
     }
+    userRig.animate(dt);
     
     renderer.render(scene, camera);
 }
