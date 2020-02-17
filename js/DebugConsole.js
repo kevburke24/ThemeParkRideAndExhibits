@@ -18,7 +18,7 @@ var debugOutput = "";
 // NUM_LINES.  Overlong lines are cropped when displayed.
 export function debugWrite(msg){
     debugOutput += msg + "\n";
-    
+
     // Determine the lines of text that appear.
     var lines = debugOutput.split('\n');
     lines = lines.slice(-NUM_LINES-1, -1);
@@ -33,8 +33,8 @@ export function debugWrite(msg){
 // Class for displaying debug text in VR.  Specialized THREE.Group.
 export class DebugConsole extends GUIVR.GuiVR {
 
-    // Creates a new instance with the specified width in world units.
-    constructor(w){
+  // Creates a new instance with the specified width in world units.
+  constructor(w){
 	super();
 
 	// Determine world dimensions of consoles.
@@ -114,5 +114,5 @@ export class DebugConsole extends GUIVR.GuiVR {
 	}
 
     }
-    
+
 }

@@ -11,9 +11,11 @@ import * as DEBUG from './DebugHelper.js';
 import * as GUIVR from './GuiVR.js';
 import * as ANIMATOR from './Animator.js';
 import * as USER from './User.js';
+import * as BLOCKS from './MovingBlocks.js';
+import * as SAUCER from './FlyingSaucer.js';
 // Imports for model loading.  The import depends on the model file type.
 // There are other model types that can be loaded.
-import {FBXLoader}  from '../extern/examples/jsm/loaders/FBXLoader.js'; 
+import {FBXLoader}  from '../extern/examples/jsm/loaders/FBXLoader.js';
 //import {GLTFLoader}  from '../extern/examples/jsm/loaders/GLTFLoader.js';
 //import {OBJLoader}  from '../extern/examples/jsm/loaders/OBJLoader.js';
 
@@ -23,10 +25,51 @@ var camera, scene, renderer;
 var userRig; // rig to move the user
 var animatedObjects = []; // List of objects whose animation function needs to be called each frame.
 
+function initMovingBlocks(userRig)
+{
+  var game1 = new BLOCKS.movingBlocks(userRig, 1, 1, 1, "hard");
+  var game2 = new BLOCKS.movingBlocks(userRig, 2, 1, 2, "easy");
+  var game3 = new BLOCKS.movingBlocks(userRig, 1.5, 1.5, 1.5, "medium");
+  game1.rotateY(THREE.Math.degToRad(360));
+  game1.position.z = -15;
+  game1.position.x = -10;
+  scene.add(game1);
+  animatedObjects.push(game1);
+  game2.rotateY(THREE.Math.degToRad(360));
+  game2.position.z = -15;
+  game2.position.x = 20;
+  scene.add(game2);
+  animatedObjects.push(game2);
+  game3.rotateY(THREE.Math.degToRad(360));
+  game3.position.z = -18;
+  game3.position.x = 0;
+  scene.add(game3);
+  animatedObjects.push(game3);
+}
+
+function initFlyingSaucer(userRig)
+{
+    var ride1 = new SAUCER.FlyingSaucer(userRig, 15, 'white');
+    var ride2 = new SAUCER.FlyingSaucer(userRig, 20, 'green');
+    var ride3 = new SAUCER.FlyingSaucer(userRig, 10, 'red');
+    ride1.position.z = -8.5;
+    ride1.position.x = 0;
+    animatedObjects.push(ride1);
+    scene.add(ride1);
+    ride2.position.z = -2;
+    ride2.position.x = 15;
+    animatedObjects.push(ride2);
+    scene.add(ride2);
+    ride3.position.z = -2;
+    ride3.position.x = -15;
+    animatedObjects.push(ride3);
+    scene.add(ride3);
+}
+
 function initExhibit1(userRig){
-    
+
     // Exhibit 1 - Animation Example
-    
+
     var exhibit = new THREE.Group();
     // Add landing platform for the exhibit.
     exhibit.add(new USER.UserPlatform(userRig));
@@ -74,7 +117,7 @@ function initExhibit2(userRig){
     let controllerModel = new THREE.Mesh(
 	new THREE.BoxGeometry(0.25, 0.25, 0.25),
 	new THREE.MeshPhongMaterial({color: 0xff0000}));
-	
+
     var exhibit = new THREE.Group();
     exhibit.add(new USER.UserPlatform(
 	userRig,
@@ -129,7 +172,7 @@ function initExhibit2(userRig){
 	    // Remove special animation attached to controller.
 	    controller.setAnimation(undefined);
 	}
-    ));  
+    ));
 
     // Rig to hold the loaded model.
     var rig = new THREE.Group();
@@ -156,7 +199,7 @@ function initExhibit2(userRig){
 
     // Load the model
     var loader = new FBXLoader();
-    
+
     loader.load(
 	'../extern/models/lambo/Lamborghini_Aventador.fbx',
 	function ( obj ) {
@@ -194,12 +237,12 @@ function initExhibit3(userRig){
     var r_inner = .25;
 
     var mesh;
-    
+
     function make_star(){
 	// Clean up old one.
 	if (mesh != undefined)
 	    exhibit.remove(mesh);
-	
+
 	var angle = THREE.Math.degToRad(360 / sides);
 	var half_angle = angle / 2;
 	var geometry = new THREE.Geometry();
@@ -259,7 +302,7 @@ function initExhibit3(userRig){
     exhibit.rotation.y = THREE.Math.degToRad(90);
     exhibit.position.z = -15;
     exhibit.position.x = -3;
-    
+
     scene.add(exhibit);
 }
 
@@ -301,7 +344,7 @@ function initExhibit4(userRig){
     light.position.y = 3;
     light.position.z = -5;
 
-    light.castShadow = true;				  
+    light.castShadow = true;
     light.animAngle = 0;
     light.setAnimation(
 	function (dt) {
@@ -312,11 +355,11 @@ function initExhibit4(userRig){
 	});
     animatedObjects.push(light);
     exhibit.add(light);
-    
+
     // Create indicate to show position and angle of light.
     var shadowCamera = new THREE.CameraHelper(light.shadow.camera);
     scene.add(shadowCamera);
-    
+
 
     var inited = false; // To keep button initialization below from moving the user.
 
@@ -362,7 +405,7 @@ function initExhibit4(userRig){
     exhibit.rotation.y = THREE.Math.degToRad(-90);
     exhibit.position.z = -15;
     exhibit.position.x = 3;
-    
+
     scene.add(exhibit);
 }
 
@@ -399,10 +442,12 @@ function initExhibits(userRig){
     scene.add(new THREE.AmbientLight(0xFFFFFF, 0.3));
 
     // Initialize the exhibits.
-    initExhibit1(userRig);
-    initExhibit2(userRig);
-    initExhibit3(userRig);
-    initExhibit4(userRig);  
+    initMovingBlocks(userRig);
+    initFlyingSaucer(userRig);
+    //initExhibit1(userRig);
+    //initExhibit2(userRig);
+    //initExhibit3(userRig);
+    //initExhibit4(userRig);
 }
 
 function init() {
@@ -413,13 +458,13 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
-    renderer.setClearColor(0x00BFFF, 1); 
+    renderer.setClearColor(0x00BFFF, 1);
 
     // Extra settings to enable shadows.
     renderer.shadowMap.enabled = true;
     renderer.shadowMapSoft = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    
+
     // Create a scene
     scene = new THREE.Scene();
 
@@ -431,10 +476,10 @@ function init() {
     // Encapsulate user camera and controllers into a rig.
     userRig = new USER.UserRig(camera, renderer.xr);
     scene.add(userRig);
-    
+
     // Create the contents of the room.
     initExhibits(userRig);
-    
+
     // Add VR button.
     document.body.appendChild(VRButton.createButton(renderer));
     window.addEventListener('resize', onWindowResize, false);
@@ -444,6 +489,7 @@ function init() {
 
     // Starts main rendering loop.
     renderer.setAnimationLoop(render);
+
 }
 
 // Event handler for controller clicks when in VR mode, and for mouse
@@ -463,7 +509,7 @@ function onSelectStart(event){
 	// Register the click into the GUI.
 	GUIVR.intersectObjects(raycaster);
     }
-    
+
 }
 
 
@@ -485,13 +531,10 @@ function render() {
 	animatedObjects[i].animate(dt);
     }
     userRig.animate(dt);
-    
+
     renderer.render(scene, camera);
 }
 
 // Main program.
 // Sets up everything.
 init();
-
-
-

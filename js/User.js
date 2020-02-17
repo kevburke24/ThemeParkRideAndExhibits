@@ -15,25 +15,25 @@ import * as GUIVR from './GuiVR.js';
 
 export class UserRig extends THREE.Group {
 
-    constructor(camera, xr){
+  constructor(camera, xr){
 	super();
 
 	this.add(camera); // Add camera to the rig.
 	this.xr = xr;
 	this.controllers = [];
-	
+
 	// Set up the controller to be represented as a line.
 	// This code use to be in init() in main.js.
 	for (var i = 0; i < 2; i++){
 	    let controller = xr.getController(i);
 	    if (controller != undefined){
 		this.controllers.push(controller);
-	
+
 		controller.addEventListener('selectstart',
 					    (ev) => (this.onSelectStartVR(ev)));
 		controller.addEventListener('selectend',
 					    (ev) => (this.onSelectEndVR(ev)));
-		
+
 		this.add(controller); // Add controller to the rig.
 		let controllerPointer =
 		    new THREE.Line(
@@ -62,10 +62,10 @@ export class UserRig extends THREE.Group {
     onSelectStartVR(event){
 	// VR trigger event handler.  Use to be in main.js, but
 	// otherwise does what it did before.
-	
+
 	if (!(event instanceof MouseEvent) && this.xr.isPresenting()){
 	    // Handle controller click in VR.
-	    
+
 	    // Retrieve the pointer object.
 	    let controller = event.target;
 	    let controllerPointer = controller.getObjectByName('pointer');
@@ -75,7 +75,7 @@ export class UserRig extends THREE.Group {
 		    controller.triggered = true;
 		}
 	    }
-	    
+
 	    // Create raycaster from the controller position along the
 	    // pointer line.
 	    let tempMatrix = new THREE.Matrix4();
@@ -83,13 +83,13 @@ export class UserRig extends THREE.Group {
 	    let raycaster = new THREE.Raycaster();
 	    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
 	    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-	    
+
 	    // Register the click into the GUI.
 	    let hit = GUIVR.intersectObjects(raycaster);
 	    if (hit){
 		//debugWrite("Hit something");
 	    }
-	    
+
 	    //DEBUG.displaySession(this.xr);
 	    //DEBUG.displaySources(this.xr);
 	    //DEBUG.displayNavigator(navigator);
@@ -97,8 +97,8 @@ export class UserRig extends THREE.Group {
     }
 
     onSelectEndVR(event){
-	// VR trigger release event handler. 
-	
+	// VR trigger release event handler.
+
 	if (!(event instanceof MouseEvent) && this.xr.isPresenting()){
 	    let controller = event.target;
 
@@ -107,7 +107,7 @@ export class UserRig extends THREE.Group {
 		    controller.triggered = false;
 		}
 	    }
-	    
+
 	}
     }
 }
@@ -128,7 +128,7 @@ export class UserPlatform extends GUIVR.GuiVR {
 	    new THREE.MeshPhongMaterial({color: 0x00FF00}));
 
 	// The front direction of the platform is -z.
-	front.position.y = 0.55;	
+	front.position.y = 0.55;
 	front.position.z = -1;
 	this.add(front);
 
@@ -140,7 +140,7 @@ export class UserPlatform extends GUIVR.GuiVR {
 	this.onLeave = onLeave;
     }
 
-    
+
     collide(uv, pt){
 	// When the user clicks on this platform, move the user to it.
 	let parent = this.userRig.parent;
@@ -149,7 +149,7 @@ export class UserPlatform extends GUIVR.GuiVR {
 		parent.onLeave();
 	    }
 	}
-	
+
 	this.add(this.userRig);
 	if (this.onLand != undefined){
 	    this.onLand();
